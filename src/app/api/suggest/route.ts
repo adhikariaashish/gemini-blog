@@ -9,21 +9,20 @@ export async function POST(req: Request) {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-    const prompt = `
-      Continue this blog post intelligently and naturally:
-      ---
-      ${currentText}
-      ---
-      Continue writing the next sentence or paragraph:
-    `;
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: `Continue this blog post:\n${currentText}` }],
+        },
+      ],
+    });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const suggestion = response.text();
+    const suggestion = result.response.text();
 
     return NextResponse.json({ suggestion });
   } catch (error) {
     console.error('Gemini Suggestion Error:', error);
-    return NextResponse.json({ suggestion: '', error: 'Failed to generate suggestion' }, { status: 500 });
+    return NextResponse.json({ suggestion: '', error: 'Gemini API failed' }, { status: 500 });
   }
 }

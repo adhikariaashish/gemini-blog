@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { NextResponse } from "next/server";
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextResponse } from 'next/server';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -7,18 +7,22 @@ export async function POST(req: Request) {
   const { topic } = await req.json();
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-    const result = await model.generateContent(
-      `Write a detailed and informative blog post on the topic: "${topic}". The tone should be professional and easy to read.`
-    );
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: `Write a detailed blog post about: ${topic}` }],
+        },
+      ],
+    });
 
-    const response = await result.response;
-    const text = response.text();
+    const fullBlog = result.response.text();
 
-    return NextResponse.json({ blog: text });
+    return NextResponse.json({ blog: fullBlog });
   } catch (error) {
-    console.error("Gemini API error:", error);
-    return NextResponse.json({ error: "Failed to generate blog" }, { status: 500 });
+    console.error('Gemini Blog Error:', error);
+    return NextResponse.json({ blog: '', error: 'Failed to generate blog' }, { status: 500 });
   }
 }
