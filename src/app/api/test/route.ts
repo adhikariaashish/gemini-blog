@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const testAPI = async () => {
   try {
     const genAI = new GoogleGenerativeAI(
-      "AIzaSyCq1xUlzmVXEAOezOsQCp4s4CnSPKuktDA"
+      process.env.GEMINI_API_KEY || "your_api_key_here"
     );
     console.log("API initialized...");
 

@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI("AIzaSyCq1xUlzmVXEAOezOsQCp4s4CnSPKuktDA");
+const genAI = new GoogleGenerativeAI("your_api_key_here");
 
 async function testGemini() {
   try {
