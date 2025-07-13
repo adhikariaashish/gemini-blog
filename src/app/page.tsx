@@ -9,13 +9,19 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // AI-Assisted Blog states
+  // AI-assisted blog states
   const [blogTitle, setBlogTitle] = useState("");
   const [assistedBlogText, setAssistedBlogText] = useState("");
   const [suggestion, setSuggestion] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [loadingSuggestion, setLoadingSuggestion] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Calculate the display text (actual text + suggestion)
+  const displayText =
+    showSuggestion && suggestion
+      ? assistedBlogText + " " + suggestion
+      : assistedBlogText;
 
   const handleGenerateBlog = async () => {
     if (!topic.trim()) return;
@@ -105,13 +111,23 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-
   const handleAssistedBlogChange = (value: string) => {
     setAssistedBlogText(value);
     setShowSuggestion(false);
 
     if (blogTitle.trim() && value.trim().length >= 10) {
       debouncedGetSuggestion(blogTitle, value);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Tab" && showSuggestion && suggestion) {
+      e.preventDefault();
+      acceptSuggestion();
+    }
+    if (e.key === "Escape" && showSuggestion) {
+      e.preventDefault();
+      rejectSuggestion();
     }
   };
 
@@ -137,18 +153,22 @@ export default function Home() {
 
   return (
     <main className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center">AI Blog Generator</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center text-black">
+        AI Blog Generator
+      </h1>
 
       {/* Full Blog Generation Section */}
       <section className="mb-12 p-6 bg-white border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Generate Full Blog</h2>
+        <h2 className="text-xl font-semibold mb-4 text-black">
+          Generate Full Blog
+        </h2>
 
         <input
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Enter a blog topic, e.g. meditation"
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-2 border rounded mb-4 text-black"
         />
 
         <button
@@ -170,77 +190,100 @@ export default function Home() {
 
       {/* AI-Assisted Blog Section */}
       <section className="p-6 bg-white border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">AI-ASSISTED BLOG</h2>
+        <h2 className="text-xl font-semibold mb-4 text-black">
+          AI-ASSISTED BLOG
+        </h2>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Blog Title</label>
+          <label className="block text-sm font-medium mb-2 text-black">
+            Blog Title
+          </label>
           <input
             type="text"
             value={blogTitle}
             onChange={(e) => setBlogTitle(e.target.value)}
             placeholder="Enter your blog title"
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
           />
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Blog Content</label>
-          <div className="relative">
+          <label className="block text-sm font-medium mb-2 text-black">
+            Blog Content
+          </label>
+          <div className="relative font-mono">
+            {/* Background div that shows the suggestion */}
+            <div
+              className="absolute top-0 left-0 w-full p-3 border border-gray-300 rounded min-h-[300px] whitespace-pre-wrap break-words text-black pointer-events-none bg-white overflow-hidden"
+              style={{
+                font: "inherit",
+                fontSize: "inherit",
+                lineHeight: "inherit",
+                fontFamily: "inherit",
+              }}
+            >
+              {assistedBlogText}
+              {showSuggestion && suggestion && (
+                <span className="text-gray-500">{" " + suggestion}</span>
+              )}
+            </div>
+
+            {/* Actual textarea on top */}
             <textarea
               ref={textareaRef}
               value={assistedBlogText}
               onChange={(e) => handleAssistedBlogChange(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Start writing your blog... (AI will suggest completions as you type)"
-              className="w-full p-3 border rounded min-h-[300px] text-black resize-y"
+              className="w-full p-3 border border-gray-300 rounded min-h-[300px] text-black resize-y relative z-10 bg-transparent"
               disabled={!blogTitle.trim()}
+              style={{
+                font: "inherit",
+                fontSize: "inherit",
+                lineHeight: "inherit",
+                fontFamily: "inherit",
+              }}
             />
-
-            {/* AI Suggestion Overlay */}
-            {showSuggestion && suggestion && (
-              <div className="absolute bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-sm shadow-lg">
-                <div className="text-sm text-gray-600 mb-2">AI Suggestion:</div>
-                <div className="text-sm text-blue-800 mb-3 italic">
-                  &ldquo;{suggestion}&rdquo;
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={acceptSuggestion}
-                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    onClick={rejectSuggestion}
-                    className="px-3 py-1 bg-gray-400 text-white text-xs rounded hover:bg-gray-500"
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Loading indicator for suggestions */}
             {loadingSuggestion && (
-              <div className="absolute bottom-4 right-4 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-                <div className="text-xs text-yellow-800">
-                  Getting suggestion...
-                </div>
+              <div className="absolute top-2 right-2 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 z-20">
+                <div className="text-xs text-black">Getting suggestion...</div>
               </div>
             )}
           </div>
 
           {!blogTitle.trim() && (
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-black mt-2">
               Please enter a blog title first to enable AI assistance.
+            </p>
+          )}
+
+          {showSuggestion && suggestion && (
+            <p className="text-xs text-gray-600 mt-2">
+              💡 Press{" "}
+              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Tab</kbd>{" "}
+              to accept suggestion or{" "}
+              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Esc</kbd>{" "}
+              to dismiss
             </p>
           )}
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-black">
           <p>
             💡 <strong>How it works:</strong> As you type, AI will suggest
             completions based on your title and content. Suggestions appear
-            after you&apos;ve written at least 10 characters.
+            after you&apos;ve written at least 10 characters as grayed-out text.
+            Press{" "}
+            <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs mx-1">
+              Tab
+            </kbd>
+            to accept or{" "}
+            <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs mx-1">
+              Esc
+            </kbd>{" "}
+            to dismiss.
           </p>
         </div>
       </section>
