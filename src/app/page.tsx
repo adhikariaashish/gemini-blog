@@ -1,292 +1,98 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import debounce from "lodash.debounce";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function Home() {
-  const [topic, setTopic] = useState("");
-  const [blog, setBlog] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+export default function LandingPage() {
+  const router = useRouter();
 
-  // AI-assisted blog states
-  const [blogTitle, setBlogTitle] = useState("");
-  const [assistedBlogText, setAssistedBlogText] = useState("");
-  const [suggestion, setSuggestion] = useState("");
-  const [showSuggestion, setShowSuggestion] = useState(false);
-  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Redirect to home page after a brief delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.push("/home");
+    }, 3000);
 
-  // Calculate the display text (actual text + suggestion)
-  const displayText =
-    showSuggestion && suggestion
-      ? assistedBlogText + " " + suggestion
-      : assistedBlogText;
-
-  const handleGenerateBlog = async () => {
-    if (!topic.trim()) return;
-
-    setLoading(true);
-    setError("");
-    setBlog("");
-
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ topic }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to generate blog");
-      }
-
-      if (data.error) {
-        setError(data.error);
-        return;
-      }
-
-      if (!data.blog || data.blog.trim().length === 0) {
-        setError("No content returned from the AI service.");
-        return;
-      }
-
-      setBlog(data.blog);
-    } catch (err: unknown) {
-      console.error("Blog generation error:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Something went wrong while generating the blog.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // AI-assisted blog functions
-  const getSuggestion = async (title: string, currentText: string) => {
-    if (!title.trim() || !currentText.trim() || currentText.length < 10) {
-      setSuggestion("");
-      setShowSuggestion(false);
-      return;
-    }
-
-    setLoadingSuggestion(true);
-    try {
-      const res = await fetch("/api/suggest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title, currentText }),
-      });
-
-      const data = await res.json();
-      if (data.suggestion && !data.error) {
-        setSuggestion(data.suggestion);
-        setShowSuggestion(true);
-      } else {
-        setSuggestion("");
-        setShowSuggestion(false);
-      }
-    } catch (error) {
-      console.error("Suggestion error:", error);
-      setSuggestion("");
-      setShowSuggestion(false);
-    } finally {
-      setLoadingSuggestion(false);
-    }
-  };
-
-  // Debounced suggestion function
-  const debouncedGetSuggestion = useCallback(
-    debounce((title: string, currentText: string) => {
-      getSuggestion(title, currentText);
-    }, 1000),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-  const handleAssistedBlogChange = (value: string) => {
-    setAssistedBlogText(value);
-    setShowSuggestion(false);
-
-    if (blogTitle.trim() && value.trim().length >= 10) {
-      debouncedGetSuggestion(blogTitle, value);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Tab" && showSuggestion && suggestion) {
-      e.preventDefault();
-      acceptSuggestion();
-    }
-    if (e.key === "Escape" && showSuggestion) {
-      e.preventDefault();
-      rejectSuggestion();
-    }
-  };
-
-  const acceptSuggestion = () => {
-    if (suggestion) {
-      const newText = assistedBlogText + " " + suggestion;
-      setAssistedBlogText(newText);
-      setSuggestion("");
-      setShowSuggestion(false);
-
-      // Focus back to textarea
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newText.length, newText.length);
-      }
-    }
-  };
-
-  const rejectSuggestion = () => {
-    setSuggestion("");
-    setShowSuggestion(false);
-  };
+    return () => clearTimeout(timer);
+  }, [router]);
 
   return (
-    <main className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center text-black">
-        AI Blog Generator
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+      <div className="text-center max-w-2xl mx-auto px-4">
+        <h1 className="text-5xl font-bold text-gray-900 mb-6">AI Blog Hub</h1>
 
-      {/* Full Blog Generation Section */}
-      <section className="mb-12 p-6 bg-white border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-black">
-          Generate Full Blog
-        </h2>
+        <p className="text-xl text-gray-600 mb-8">
+          Create amazing blogs with the power of AI. Generate complete articles
+          or get intelligent writing assistance as you type.
+        </p>
 
-        <input
-          type="text"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="Enter a blog topic, e.g. meditation"
-          className="w-full p-2 border rounded mb-4 text-black"
-        />
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <Link
+            href="/write"
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Start Writing
+          </Link>
 
-        <button
-          onClick={handleGenerateBlog}
-          className="px-4 py-2 bg-blue-600 text-white rounded mb-4 disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? "Generating..." : "Generate Full Blog"}
-        </button>
-
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-
-        {blog && (
-          <div className="whitespace-pre-wrap p-4 bg-gray-100 border rounded mt-4 text-black">
-            {blog}
-          </div>
-        )}
-      </section>
-
-      {/* AI-Assisted Blog Section */}
-      <section className="p-6 bg-white border rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 text-black">
-          AI-ASSISTED BLOG
-        </h2>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2 text-black">
-            Blog Title
-          </label>
-          <input
-            type="text"
-            value={blogTitle}
-            onChange={(e) => setBlogTitle(e.target.value)}
-            placeholder="Enter your blog title"
-            className="w-full p-2 border rounded text-black"
-          />
+          <Link
+            href="/home"
+            className="px-8 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+          >
+            Browse Blogs
+          </Link>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2 text-black">
-            Blog Content
-          </label>
-          <div className="relative font-mono">
-            {/* Background div that shows the suggestion */}
-            <div
-              className="absolute top-0 left-0 w-full p-3 border border-gray-300 rounded min-h-[300px] whitespace-pre-wrap break-words text-black pointer-events-none bg-white overflow-hidden"
-              style={{
-                font: "inherit",
-                fontSize: "inherit",
-                lineHeight: "inherit",
-                fontFamily: "inherit",
-              }}
-            >
-              {assistedBlogText}
-              {showSuggestion && suggestion && (
-                <span className="text-gray-500">{" " + suggestion}</span>
-              )}
-            </div>
+        {/* Authentication Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <Link
+            href="/login"
+            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          >
+            Login
+          </Link>
 
-            {/* Actual textarea on top */}
-            <textarea
-              ref={textareaRef}
-              value={assistedBlogText}
-              onChange={(e) => handleAssistedBlogChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Start writing your blog... (AI will suggest completions as you type)"
-              className="w-full p-3 border border-gray-300 rounded min-h-[300px] text-black resize-y relative z-10 bg-transparent"
-              disabled={!blogTitle.trim()}
-              style={{
-                font: "inherit",
-                fontSize: "inherit",
-                lineHeight: "inherit",
-                fontFamily: "inherit",
-              }}
-            />
+          <Link
+            href="/signup"
+            className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+          >
+            Sign Up
+          </Link>
+        </div>
 
-            {/* Loading indicator for suggestions */}
-            {loadingSuggestion && (
-              <div className="absolute top-2 right-2 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 z-20">
-                <div className="text-xs text-black">Getting suggestion...</div>
-              </div>
-            )}
+        <div className="text-sm text-gray-500">
+          Redirecting to home page in 3 seconds...
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              🤖 AI-Powered Generation
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Generate complete blog posts from just a topic using advanced AI.
+            </p>
           </div>
 
-          {!blogTitle.trim() && (
-            <p className="text-sm text-black mt-2">
-              Please enter a blog title first to enable AI assistance.
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              ✍️ Smart Writing Assistant
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Get real-time suggestions as you write, just like GitHub Copilot.
             </p>
-          )}
+          </div>
 
-          {showSuggestion && suggestion && (
-            <p className="text-xs text-gray-600 mt-2">
-              💡 Press{" "}
-              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Tab</kbd>{" "}
-              to accept suggestion or{" "}
-              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Esc</kbd>{" "}
-              to dismiss
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              🌍 Share & Discover
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Publish your blogs and discover amazing content from other
+              writers.
             </p>
-          )}
+          </div>
         </div>
-
-        <div className="text-sm text-black">
-          <p>
-            💡 <strong>How it works:</strong> As you type, AI will suggest
-            completions based on your title and content. Suggestions appear
-            after you&apos;ve written at least 10 characters as grayed-out text.
-            Press{" "}
-            <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs mx-1">
-              Tab
-            </kbd>
-            to accept or{" "}
-            <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs mx-1">
-              Esc
-            </kbd>{" "}
-            to dismiss.
-          </p>
-        </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }

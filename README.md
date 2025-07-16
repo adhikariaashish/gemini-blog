@@ -1,13 +1,29 @@
-# AI Blog Generator
+# AI Blog Hub
 
-An intelligent blog generation application powered by Google's Gemini AI, built with Next.js.
+An intelligent blog platform powered by Google's Gemini AI, built with Next.js. Create, publish, and discover amazing blog content with AI assistance.
 
-## Features
+## ✨ New Features
+
+### 🔐 **User Authentication**
+
+- **Login & Signup Pages**: Beautiful authentication forms with proper validation
+- **Guest Access**: Continue using the platform without creating an account
+- **User Sessions**: Local storage for maintaining login state
+- **Responsive Auth UI**: Mobile-friendly login and signup experiences
+
+### 🏠 **Home Page & Publishing System**
+
+- **Browse Published Blogs**: View all published blogs in a beautiful card layout
+- **Publish Your Blogs**: One-click publishing from the write page
+- **Author Attribution**: Add your name to published blogs
+- **Real-time Updates**: See newly published blogs instantly
+
+### ✍️ **Enhanced Writing Experience**
 
 - **Full Blog Generation**: Generate complete blog posts from a single topic
-- **AI-Assisted Writing**: Real-time AI suggestions as you write
+- **AI-Assisted Writing**: Real-time AI suggestions as you write (VS Code Copilot style)
 - **Smart Auto-completion**: Context-aware text suggestions based on your title and content
-- **Modern UI**: Clean, responsive interface with Tailwind CSS
+- **Keyboard Shortcuts**: Tab to accept, Esc to dismiss suggestions
 
 ## 🔒 Security Setup (IMPORTANT)
 
