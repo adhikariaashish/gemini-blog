@@ -4,6 +4,8 @@ import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import debounce from "lodash.debounce";
+import ReactMarkdown from "react-markdown";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function WritePage() {
   const router = useRouter();
@@ -200,14 +202,14 @@ export default function WritePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link
               href="/home"
-              className="text-2xl font-bold text-black hover:text-blue-600"
+              className="text-2xl font-bold text-black dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
             >
               AI Blog Hub
             </Link>
@@ -217,11 +219,12 @@ export default function WritePage() {
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
                 placeholder="Your name (optional)"
-                className="px-3 py-1 border rounded text-black text-sm"
+                className="px-3 py-1 border rounded text-black dark:text-white dark:bg-gray-700 dark:border-gray-600 text-sm"
               />
+              <ThemeToggle />
               <Link
                 href="/login"
-                className="px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm"
+                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium text-sm"
               >
                 Login
               </Link>
@@ -233,7 +236,7 @@ export default function WritePage() {
               </Link>
               <Link
                 href="/home"
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm"
               >
                 View Blogs
               </Link>
@@ -243,13 +246,13 @@ export default function WritePage() {
       </header>
 
       <main className="max-w-4xl mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-8 text-center text-black">
+        <h1 className="text-3xl font-bold mb-8 text-center text-black dark:text-white">
           Write Your Blog
         </h1>
 
         {/* Full Blog Generation Section */}
-        <section className="mb-12 p-6 bg-white border rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-black">
+        <section className="mb-12 p-6 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-sm">
+          <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
             Generate Full Blog
           </h2>
 
@@ -258,7 +261,7 @@ export default function WritePage() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Enter a blog topic, e.g. meditation"
-            className="w-full p-2 border rounded mb-4 text-black"
+            className="w-full p-2 border dark:border-gray-600 rounded mb-4 text-black dark:text-white dark:bg-gray-700"
           />
 
           <div className="flex gap-2 mb-4">
@@ -281,23 +284,25 @@ export default function WritePage() {
             )}
           </div>
 
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+          {error && (
+            <p className="text-red-500 dark:text-red-400 mb-4">{error}</p>
+          )}
 
           {blog && (
-            <div className="whitespace-pre-wrap p-4 bg-gray-100 border rounded mt-4 text-black">
-              {blog}
+            <div className="whitespace-pre-wrap p-4 bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 rounded mt-4 text-black dark:text-white">
+              <ReactMarkdown>{blog}</ReactMarkdown>
             </div>
           )}
         </section>
 
         {/* AI-Assisted Blog Section */}
-        <section className="p-6 bg-white border rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-black">
+        <section className="p-6 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-sm">
+          <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
             AI-ASSISTED BLOG
           </h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-black">
+            <label className="block text-sm font-medium mb-2 text-black dark:text-white">
               Blog Title
             </label>
             <input
@@ -305,18 +310,18 @@ export default function WritePage() {
               value={blogTitle}
               onChange={(e) => setBlogTitle(e.target.value)}
               placeholder="Enter your blog title"
-              className="w-full p-2 border rounded text-black"
+              className="w-full p-2 border dark:border-gray-600 rounded text-black dark:text-white dark:bg-gray-700"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-black">
+            <label className="block text-sm font-medium mb-2 text-black dark:text-white">
               Blog Content
             </label>
             <div className="relative font-mono">
               {/* Background div that shows the suggestion */}
               <div
-                className="absolute top-0 left-0 w-full p-3 border border-gray-300 rounded min-h-[300px] whitespace-pre-wrap break-words text-black pointer-events-none bg-white overflow-hidden"
+                className="absolute top-0 left-0 w-full p-3 border border-gray-300 dark:border-gray-600 rounded min-h-[300px] whitespace-pre-wrap break-words text-black dark:text-white pointer-events-none bg-white dark:bg-gray-700 overflow-hidden"
                 style={{
                   font: "inherit",
                   fontSize: "inherit",
@@ -326,7 +331,9 @@ export default function WritePage() {
               >
                 {assistedBlogText}
                 {showSuggestion && suggestion && (
-                  <span className="text-gray-500">{" " + suggestion}</span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    {" " + suggestion}
+                  </span>
                 )}
               </div>
 
@@ -337,7 +344,7 @@ export default function WritePage() {
                 onChange={(e) => handleAssistedBlogChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Start writing your blog... (AI will suggest completions as you type)"
-                className="w-full p-3 border border-gray-300 rounded min-h-[300px] text-black resize-y relative z-10 bg-transparent"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded min-h-[300px] text-black dark:text-white resize-y relative z-10 bg-transparent dark:bg-transparent"
                 disabled={!blogTitle.trim()}
                 style={{
                   font: "inherit",
@@ -349,8 +356,8 @@ export default function WritePage() {
 
               {/* Loading indicator for suggestions */}
               {loadingSuggestion && (
-                <div className="absolute top-2 right-2 bg-yellow-100 border border-yellow-300 rounded px-2 py-1 z-20">
-                  <div className="text-xs text-black">
+                <div className="absolute top-2 right-2 bg-yellow-100 dark:bg-yellow-800 border border-yellow-300 dark:border-yellow-600 rounded px-2 py-1 z-20">
+                  <div className="text-xs text-black dark:text-white">
                     Getting suggestion...
                   </div>
                 </div>
@@ -358,19 +365,19 @@ export default function WritePage() {
             </div>
 
             {!blogTitle.trim() && (
-              <p className="text-sm text-black mt-2">
+              <p className="text-sm text-black dark:text-white mt-2">
                 Please enter a blog title first to enable AI assistance.
               </p>
             )}
 
             {showSuggestion && suggestion && (
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                 💡 Press{" "}
-                <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">
+                <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs">
                   Tab
                 </kbd>{" "}
                 to accept suggestion or{" "}
-                <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">
+                <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs">
                   Esc
                 </kbd>{" "}
                 to dismiss
@@ -390,17 +397,17 @@ export default function WritePage() {
             )}
           </div>
 
-          <div className="text-sm text-black">
+          <div className="text-sm text-black dark:text-white">
             <p>
               💡 <strong>How it works:</strong> As you type, AI will suggest
               completions based on your title and content. Suggestions appear
               after you&apos;ve written at least 10 characters as grayed-out
               text. Press{" "}
-              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs mx-1">
+              <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs mx-1">
                 Tab
               </kbd>{" "}
               to accept or{" "}
-              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs mx-1">
+              <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs mx-1">
                 Esc
               </kbd>{" "}
               to dismiss.
