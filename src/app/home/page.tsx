@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import ThemeToggle from "@/components/ThemeToggle";
-import ThemeDebug from "@/components/ThemeDebug";
 import ReactMarkdown from "react-markdown";
 
 interface Blog {
@@ -81,7 +79,20 @@ const HomePage = () => {
               >
                 Write Blog
               </Link>
-              <ThemeToggle />
+              
+              <Link
+                href="/login"
+                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium text-sm"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+              >
+                Sign Up
+              </Link>
+              
             </div>
           </div>
         </div>
@@ -206,9 +217,6 @@ const HomePage = () => {
           </div>
         )}
       </main>
-
-      {/* Temporary debug component */}
-      <ThemeDebug />
     </div>
   );
 };

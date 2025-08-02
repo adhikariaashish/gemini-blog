@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import debounce from "lodash.debounce";
 import ReactMarkdown from "react-markdown";
-import ThemeToggle from "@/components/ThemeToggle";
 
 export default function WritePage() {
   const router = useRouter();
@@ -221,19 +220,7 @@ export default function WritePage() {
                 placeholder="Your name (optional)"
                 className="px-3 py-1 border rounded text-black dark:text-white dark:bg-gray-700 dark:border-gray-600 text-sm"
               />
-              <ThemeToggle />
-              <Link
-                href="/login"
-                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium text-sm"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-              >
-                Sign Up
-              </Link>
+              
               <Link
                 href="/home"
                 className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm"

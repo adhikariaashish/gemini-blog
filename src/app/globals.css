@@ -1,12 +1,7 @@
 @import "tailwindcss";
 
-/* Custom CSS variables that work with Tailwind dark mode */
+/* Dark theme CSS variables */
 html {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-html.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
 }

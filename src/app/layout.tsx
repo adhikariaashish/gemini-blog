@@ -30,26 +30,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                try {
-                  const savedTheme = localStorage.getItem('theme');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const theme = savedTheme || (prefersDark ? 'dark' : 'light');
-                  
-                  // Remove dark class
-                  document.documentElement.classList.remove('dark');
-                  
-                  // Add dark class only if needed
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  }
-                  
-                  // Set data attribute
-                  document.documentElement.setAttribute('data-theme', theme);
-                } catch (e) {
-                  // Fallback: ensure we're in light mode
-                  document.documentElement.classList.remove('dark');
-                  document.documentElement.setAttribute('data-theme', 'light');
-                }
+                // Always apply dark theme
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
               })();
             `,
           }}
