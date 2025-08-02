@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
+import { promises as fs } from "fs";
+import path from "path";
 
-// Simple in-memory storage for now (in production, use a real database)
-const publishedBlogs: Array<{
+// File path for storing blogs
+const BLOGS_FILE_PATH = path.join(process.cwd(), "data", "blogs.json");
+
+// Default blogs for initial setup
+const defaultBlogs: Array<{
   id: string;
   title: string;
   content: string;
@@ -34,12 +39,55 @@ const publishedBlogs: Array<{
   },
 ];
 
+// Ensure data directory exists
+async function ensureDataDirectory() {
+  const dataDir = path.join(process.cwd(), "data");
+  try {
+    await fs.access(dataDir);
+  } catch {
+    await fs.mkdir(dataDir, { recursive: true });
+  }
+}
+
+// Read blogs from file
+async function readBlogs() {
+  try {
+    await ensureDataDirectory();
+    const data = await fs.readFile(BLOGS_FILE_PATH, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    // If file doesn't exist or is corrupted, return default blogs
+    console.log("No blogs file found, using defaults");
+    await writeBlogs(defaultBlogs);
+    return defaultBlogs;
+  }
+}
+
+// Write blogs to file
+async function writeBlogs(
+  blogs: Array<{
+    id: string;
+    title: string;
+    content: string;
+    publishedAt: string;
+    author: string;
+  }>
+) {
+  try {
+    await ensureDataDirectory();
+    await fs.writeFile(BLOGS_FILE_PATH, JSON.stringify(blogs, null, 2));
+  } catch (error) {
+    console.error("Error writing blogs to file:", error);
+  }
+}
+
 // GET - Fetch all published blogs
 export async function GET() {
   try {
+    const blogs = await readBlogs();
     // Sort blogs by published date (newest first)
-    const sortedBlogs = publishedBlogs.sort(
-      (a, b) =>
+    const sortedBlogs = blogs.sort(
+      (a: { publishedAt: string }, b: { publishedAt: string }) =>
         new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
 
@@ -79,7 +127,10 @@ export async function POST(req: Request) {
       author: author?.trim() || "Anonymous",
     };
 
-    publishedBlogs.push(newBlog);
+    // Read existing blogs and add new one
+    const existingBlogs = await readBlogs();
+    existingBlogs.push(newBlog);
+    await writeBlogs(existingBlogs);
 
     console.log("Blog published:", newBlog.title);
 

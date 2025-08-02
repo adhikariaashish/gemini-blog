@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,13 +40,7 @@ export default function SignupPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Mock successful signup
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          email: formData.email,
-          name: formData.name,
-        })
-      );
+      login(formData.email, formData.name);
       router.push("/home");
     } catch {
       setError("Signup failed. Please try again.");

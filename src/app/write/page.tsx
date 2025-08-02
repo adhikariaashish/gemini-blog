@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import debounce from "lodash.debounce";
 import ReactMarkdown from "react-markdown";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function WritePage() {
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Full blog generation states
   const [topic, setTopic] = useState("");
@@ -25,7 +27,73 @@ export default function WritePage() {
 
   // Publishing states
   const [publishing, setPublishing] = useState(false);
-  const [authorName, setAuthorName] = useState("");
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  // AI-assisted blog functions
+  const getSuggestion = useCallback(
+    async (title: string, currentText: string) => {
+      if (!title.trim() || !currentText.trim() || currentText.length < 10) {
+        setSuggestion("");
+        setShowSuggestion(false);
+        return;
+      }
+
+      setLoadingSuggestion(true);
+      try {
+        const res = await fetch("/api/suggest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, currentText }),
+        });
+
+        const data = await res.json();
+        if (data.suggestion && !data.error) {
+          setSuggestion(data.suggestion);
+          setShowSuggestion(true);
+        } else {
+          setSuggestion("");
+          setShowSuggestion(false);
+        }
+      } catch (error) {
+        console.error("Suggestion error:", error);
+        setSuggestion("");
+        setShowSuggestion(false);
+      } finally {
+        setLoadingSuggestion(false);
+      }
+    },
+    []
+  );
+
+  // Debounced suggestion function
+  const debouncedGetSuggestion = useCallback(
+    (title: string, currentText: string) => {
+      const debouncedFn = debounce(getSuggestion, 1000);
+      debouncedFn(title, currentText);
+    },
+    [getSuggestion]
+  );
+
+  // Show loading while checking authentication
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">
+            Redirecting to login...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleGenerateBlog = async () => {
     if (!topic.trim()) return;
@@ -71,49 +139,6 @@ export default function WritePage() {
       setLoading(false);
     }
   };
-
-  // AI-assisted blog functions
-  const getSuggestion = async (title: string, currentText: string) => {
-    if (!title.trim() || !currentText.trim() || currentText.length < 10) {
-      setSuggestion("");
-      setShowSuggestion(false);
-      return;
-    }
-
-    setLoadingSuggestion(true);
-    try {
-      const res = await fetch("/api/suggest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title, currentText }),
-      });
-
-      const data = await res.json();
-      if (data.suggestion && !data.error) {
-        setSuggestion(data.suggestion);
-        setShowSuggestion(true);
-      } else {
-        setSuggestion("");
-        setShowSuggestion(false);
-      }
-    } catch (error) {
-      console.error("Suggestion error:", error);
-      setSuggestion("");
-      setShowSuggestion(false);
-    } finally {
-      setLoadingSuggestion(false);
-    }
-  };
-
-  // Debounced suggestion function
-  const debouncedGetSuggestion = useCallback(
-    debounce((title: string, currentText: string) => {
-      getSuggestion(title, currentText);
-    }, 1000),
-    [getSuggestion]
-  );
 
   const handleAssistedBlogChange = (value: string) => {
     setAssistedBlogText(value);
@@ -172,7 +197,7 @@ export default function WritePage() {
         body: JSON.stringify({
           title: title.trim(),
           content: content.trim(),
-          author: authorName.trim() || "Anonymous",
+          author: user.name || "Anonymous",
         }),
       });
 
@@ -213,14 +238,15 @@ export default function WritePage() {
               AI Blog Hub
             </Link>
             <div className="flex gap-3 items-center">
-              <input
-                type="text"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                placeholder="Your name (optional)"
-                className="px-3 py-1 border rounded text-black dark:text-white dark:bg-gray-700 dark:border-gray-600 text-sm"
-              />
-              
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                {user.email.charAt(0).toUpperCase()}
+              </div>
+              <button
+                onClick={logout}
+                className="px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors"
+              >
+                Logout
+              </button>
               <Link
                 href="/home"
                 className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm"

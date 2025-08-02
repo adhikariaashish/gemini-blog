@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Blog {
   id: string;
@@ -13,6 +14,7 @@ interface Blog {
 }
 
 const HomePage = () => {
+  const { user, isAuthenticated, logout } = useAuth();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -73,26 +75,48 @@ const HomePage = () => {
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                href="/write"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                Write Blog
-              </Link>
-              
-              <Link
-                href="/login"
-                className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium text-sm"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-              >
-                Sign Up
-              </Link>
-              
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/write"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Write Blog
+                  </Link>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      {user?.email.charAt(0).toUpperCase()}
+                    </div>
+                    <button
+                      onClick={logout}
+                      className="px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/write"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Write Blog
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium text-sm"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -144,14 +168,25 @@ const HomePage = () => {
                   No blogs yet
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Be the first to write a blog and share your thoughts!
+                  {isAuthenticated
+                    ? "Be the first to write a blog and share your thoughts!"
+                    : "Sign in to write and share your thoughts!"}
                 </p>
-                <Link
-                  href="/write"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                >
-                  Write Your First Blog
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    href="/write"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    Write Your First Blog
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    Sign In to Write
+                  </Link>
+                )}
               </div>
             ) : (
               blogs.map((blog) => (

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,10 +23,8 @@ export default function LoginPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Mock successful login
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ email, name: email.split("@")[0] })
-      );
+      const userName = email.split("@")[0];
+      login(email, userName);
       router.push("/home");
     } catch {
       setError("Login failed. Please try again.");
