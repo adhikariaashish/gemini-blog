@@ -149,3 +149,61 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+// DELETE - Delete a blog (admin only)
+export async function DELETE(req: Request) {
+  try {
+    const { blogId, isAdmin } = await req.json();
+
+    // Check if user is admin
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: "Unauthorized. Admin access required." },
+        { status: 403 }
+      );
+    }
+
+    // Validation
+    if (!blogId) {
+      return NextResponse.json(
+        { error: "Blog ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Read existing blogs
+    const existingBlogs = await readBlogs();
+
+    // Find the blog to delete
+    const blogIndex = existingBlogs.findIndex(
+      (blog: { id: string }) => blog.id === blogId
+    );
+
+    if (blogIndex === -1) {
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+    }
+
+    // Remove the blog
+    const deletedBlog = existingBlogs[blogIndex];
+    existingBlogs.splice(blogIndex, 1);
+
+    // Save updated blogs
+    await writeBlogs(existingBlogs);
+
+    console.log("Blog deleted:", deletedBlog.title);
+
+    return NextResponse.json({
+      success: true,
+      message: "Blog deleted successfully!",
+      deletedBlog,
+    });
+  } catch (error: unknown) {
+    let message = "Unknown error";
+    if (error instanceof Error) {
+      message = error.message;
+    }
+
+    console.error("Delete blog error:", error);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

@@ -5,11 +5,12 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 interface User {
   email: string;
   name: string;
+  isAdmin: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, name: string) => void;
+  login: (email: string, name: string, isAdmin?: boolean) => void;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -34,8 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = (email: string, name: string) => {
-    const userData = { email, name };
+  const login = (email: string, name: string, isAdmin: boolean = false) => {
+    const userData = { email, name, isAdmin };
     setUser(userData);
     if (typeof window !== "undefined") {
       localStorage.setItem("user", JSON.stringify(userData));

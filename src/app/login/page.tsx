@@ -22,9 +22,12 @@ export default function LoginPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // Check for admin credentials
+      const isAdmin = email === "admin" && password === "admin";
+
       // Mock successful login
-      const userName = email.split("@")[0];
-      login(email, userName);
+      const userName = email.includes("@") ? email.split("@")[0] : email;
+      login(email, userName, isAdmin);
       router.push("/home");
     } catch {
       setError("Login failed. Please try again.");
@@ -63,15 +66,15 @@ export default function LoginPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              Email
+              Email or Username
             </label>
             <input
-              type="email"
+              type="text"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black dark:text-white dark:bg-gray-700"
-              placeholder="Enter your email"
+              placeholder="Enter your email or username"
               required
             />
           </div>
@@ -102,7 +105,6 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             Don&apos;t have an account?{" "}
@@ -114,7 +116,6 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-
         <div className="mt-4 text-center">
           <Link
             href="/home"
